@@ -113,7 +113,7 @@ CREATE TABLE `JobState` (
 -- Table structure for `Server`
 -- ----------------------------
 CREATE TABLE `Server` (
-  `Id` varchar(50) NOT NULL,
+  `Id` varchar(100) NOT NULL,
   `Data` longtext NOT NULL,
   `LastHeartbeat` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`)
