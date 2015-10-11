@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Hangfire.MySql.src.Entities.Interfaces
 {
-    internal interface IHasId
+    public interface IHasId
     {
         int Id { get; }
     }

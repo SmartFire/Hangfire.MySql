@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Hangfire.MySql.src.Entities.Filters;
+using Hangfire.MySql.src.Entities.Interfaces;
 using LinqToDB;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.MySql;
@@ -40,9 +43,16 @@ namespace Hangfire.MySql.src
         {
             return Invoke(func);
         }
-        
 
-        
+        protected TResult Get<TResult>(int id) where TResult: class, IHasId
+        {
+            return UsingTable<TResult, TResult>(table => table.SingleById(id));
+        }
+
+        protected TResult Get<TResult>(string id) where TResult : class, IHasId
+        {
+            return UsingTable<TResult, TResult>(table => table.SingleById(id));
+        }
 
         protected abstract TResult Invoke<TResult>(Func<DataConnection, TResult> func);
 

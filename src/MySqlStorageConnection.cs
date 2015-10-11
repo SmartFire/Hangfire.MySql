@@ -159,43 +159,14 @@ namespace Hangfire.MySql.src
         public JobData GetJobData(string jobId)
         {
             Debug.WriteLine("#" + jobId + " GetJobData");
-
-            return UsingTable<Entities.Job,JobData>(table =>
-            {
-                Entities.Job persistedJob = table.Single(j => j.Id == Convert.ToInt32(jobId));
-                return persistedJob.ToJobData();
-
-            });
-
+            return Get<Entities.Job>(jobId).ToJobData();
         }
 
         public StateData GetStateData(string jobId)
         {
-            Debug.WriteLine("#" + jobId + " GetStateData");
-
-            var job = UsingDatabase(db => db.GetTable<Entities.Job>().Row(Convert.ToInt32(jobId)));
-
-            return job.ToStateData();
-
-                /**
-
-
-            return UsingDatabase<StateData>(db =>
-            {
-                var jobStateId = db.GetTable<Entities.Job>()
-                    .Single(j => j.Id == Convert.ToInt32(jobId))
-                    .StateId;
-
-                var stateDataString = db.GetTable<JobState>()
-                    .Single(js => js.Id == jobStateId)
-                    .Data;
-
-                return JsonConvert.DeserializeObject<StateData>(stateDataString);
-
-            });
-                 * 
-                 * **/
+            return Get<Entities.Job>(jobId).ToStateData();
         }
+
 
         public void AnnounceServer(string serverId, ServerContext context)
         {

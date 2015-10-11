@@ -12,11 +12,17 @@ namespace Hangfire.MySql.src.Entities.Extensions
 {
     internal static class JobExtensions
     {
-        internal static JobData ToJobData(this Entities.Job job)
+
+        internal static Hangfire.Common.Job ToCommonJob(this Entities.Job job)
         {
             var invocationData = JsonConvert.DeserializeObject<InvocationData>(job.InvocationData);
             invocationData.Arguments = job.Arguments;
+            return invocationData.Deserialize();
+        }
 
+
+        internal static JobData ToJobData(this Entities.Job job)
+        {
             var returnValue = new JobData()
             {
                 State = job.StateName,
@@ -25,7 +31,7 @@ namespace Hangfire.MySql.src.Entities.Extensions
 
             try
             {
-                returnValue.Job = invocationData.Deserialize();
+                returnValue.Job = job.ToCommonJob();
             }
             catch (JobLoadException ex)
             {

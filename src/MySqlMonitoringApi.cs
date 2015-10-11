@@ -11,9 +11,11 @@ using Hangfire.Common;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
 using Hangfire.MySql.src.Entities.Extensions;
+using Hangfire.MySql.src.Entities.Filters;
 using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
+using LinqToDB;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Job = Hangfire.Common.Job;
@@ -116,7 +118,7 @@ namespace Hangfire.MySql.src
         {
             return UsingDatabase<JobDetailsDto>(db =>
             {
-                var job = db.GetTable<Entities.Job>().Single(j => j.Id == Convert.ToInt32(jobId));
+                var job = db.GetTable<Entities.Job>().SingleById(jobId);
 
                 var histories = db.GetTable<Entities.JobState>().Where(js => js.JobId == job.Id).Select(jobState => new StateHistoryDto()
                 {
@@ -240,18 +242,18 @@ namespace Hangfire.MySql.src
                 foreach (var sqlJob in jobs)
                 {
 
-                    var stateData = JsonConvert.DeserializeObject<Dictionary<string, string>>(sqlJob.StateData);
+                    var stateData = sqlJob.ToStateData().Data;
 
                     var s = new SucceededJobDto()
                     {
-                        Job = DeserializeJob(sqlJob.InvocationData, sqlJob.Arguments),
+                        Job = sqlJob.ToCommonJob(),
                         InSucceededState = true,
                         Result = stateData.ContainsKey("Result") ? stateData["Result"] : null,
                         TotalDuration = stateData.ContainsKey("PerformanceDuration") && stateData.ContainsKey("Latency")
                             ? (long?) long.Parse(stateData["PerformanceDuration"]) +
                               (long?) long.Parse(stateData["Latency"])
                             : null,
-                        SucceededAt = JobHelper.DeserializeNullableDateTime(stateData["SucceededAt"])
+                        SucceededAt = sqlJob.GetNullableDateTimeStateDataValue("SucceededAt")
                     };
 
                     list.Add(new KeyValuePair<string, SucceededJobDto>(

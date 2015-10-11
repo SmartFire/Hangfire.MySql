@@ -11,10 +11,14 @@ namespace Hangfire.MySql.src.Entities.Filters
     internal static class IdFilters
     {
 
-        internal static T Row<T>(this IQueryable<T> queryable, int id) where T:IHasId
+        internal static T SingleById<T>(this IQueryable<T> queryable, int id) where T:IHasId
         {
             return queryable.Single(row => row.Id == id);
+        }
 
+        internal static T SingleById<T>(this IQueryable<T> queryable, string id) where T : IHasId
+        {
+            return queryable.SingleById(Convert.ToInt32(id));
         }
 
     }
