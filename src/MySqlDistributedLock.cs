@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire.Logging;
 using Hangfire.MySql.src.Entities;
 using LinqToDB;
 using LinqToDB.Data;
@@ -42,11 +43,16 @@ namespace Hangfire.MySql.src
 
             }
 
-            Debug.WriteLine("acquired MySqlDistributedLock " + _resource);
-
+           Logger.Trace("Acquired lock " + resource);
 
 
         }
+
+        protected ILog Logger
+        {
+            get { return LogProvider.GetCurrentClassLogger(); }
+        }
+
 
         protected int InsertRow()
         {
@@ -71,7 +77,8 @@ namespace Hangfire.MySql.src
 
         public void Dispose()
         {
-            Debug.WriteLine("disposing MySqlDistributedLock " + _resource);
+
+            Logger.Trace("Disposing lock " + _resource);
 
             if (!_lockDeleted)
             {
@@ -80,7 +87,7 @@ namespace Hangfire.MySql.src
                 {
                     int nDeleted = db.GetTable<DistributedLock>().Where(dl => dl.Id == _lockId).Delete();
                     if (nDeleted != 1)
-                        throw new MySqlDistributedLockException("Lock " + _lockId + " on reousrce " + _resource +
+                        throw new MySqlDistributedLockException("Lock " + _lockId + " on resource " + _resource +
                                                                 " disappeared");
 
                 }

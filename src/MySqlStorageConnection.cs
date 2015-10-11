@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.Common;
+using Hangfire.Logging;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
 using Hangfire.MySql.src.Entities.Extensions;
@@ -63,8 +64,10 @@ namespace Hangfire.MySql.src
             TimeSpan expireIn)
         {
 
-            Debug.Write("CreateExpiredJob ");
+            ILog log = LogProvider.GetLogger(this.GetType());
 
+          
+            Debug.Write("CreateExpiredJob ");
 
             // TODO make this a transaction
 
@@ -96,7 +99,9 @@ namespace Hangfire.MySql.src
 
                 }
 
-                Debug.WriteLine("#" + jobId);
+
+                log.Log(LogLevel.Trace, ()=> string.Format("CreateExpiredJob inserted job {0}", jobId));
+
 
                 return jobId.ToString(CultureInfo.InvariantCulture);
             });
