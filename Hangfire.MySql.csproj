@@ -71,6 +71,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -82,6 +83,9 @@
     <Compile Include="src\Common\ShortConnectingDatabaseActor.cs" />
     <Compile Include="src\Entities\Counter.cs" />
     <Compile Include="src\Entities\EnqueuedAndFetchedCount.cs" />
+    <Compile Include="src\Entities\Extensions\JobExtensions.cs" />
+    <Compile Include="src\Entities\Filters\IdFilters.cs" />
+    <Compile Include="src\Entities\Interfaces\IHasId.cs" />
     <Compile Include="src\Entities\JobParameter.cs" />
     <Compile Include="src\Entities\JobQueue.cs" />
     <Compile Include="src\Entities\List.cs" />
@@ -96,6 +100,7 @@
     <Compile Include="src\IPersistentJobQueue.cs" />
     <Compile Include="src\IPersistentJobQueueProvider.cs" />
     <Compile Include="src\Common\DatabaseActor.cs" />
+    <Compile Include="src\Entities\Filters\JobQueueFilters.cs" />
     <Compile Include="src\MySqlDistributedLock.cs" />
     <Compile Include="src\MySqlDistributedLockException.cs" />
     <Compile Include="src\MySqlFetchedJob.cs" />

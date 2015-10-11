@@ -16,7 +16,7 @@ namespace Hangfire.MySql.src
         private readonly MySqlStorageOptions _options;
 
         public MySqlJobQueueMonitoringApi(string connectionString, MySqlStorageOptions options)
-            :base(connectionString)
+            : base(connectionString)
         {
             options.Should().NotBeNull();
             _options = options;
@@ -24,22 +24,39 @@ namespace Hangfire.MySql.src
 
         public IEnumerable<string> GetQueues()
         {
-            throw new NotImplementedException();
+            return
+                UsingTable<Entities.JobQueue, IEnumerable<string>>(
+                    jobQueues => jobQueues.Select(jq => jq.Queue).Distinct());
         }
 
         public IEnumerable<int> GetEnqueuedJobIds(string queue, int @from, int perPage)
         {
-            throw new NotImplementedException();
+            return
+                UsingTable<Entities.JobQueue, IEnumerable<int>>(
+                    jobQueues => jobQueues
+                                .InQueue(queue)
+                                .OrderBy(jobQueue => jobQueue.Id)
+                                .Skip(from)
+                                .Take(perPage)
+                                .Select(jobQueue => jobQueue.JobId));
         }
 
         public IEnumerable<int> GetFetchedJobIds(string queue, int @from, int perPage)
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<int>();
         }
 
         public EnqueuedAndFetchedCount GetEnqueuedAndFetchedCount(string queue)
         {
-            throw new NotImplementedException();
+            var enqueuedAndFetchedCount = new EnqueuedAndFetchedCount()
+            {
+                EnqueuedCount = UsingTable<Entities.JobQueue, long>(jobQueues => jobQueues.InQueue(queue).Count()),
+                FetchedCount = 0
+            };
+
+            return enqueuedAndFetchedCount;
         }
+
     }
 }
+

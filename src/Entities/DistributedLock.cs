@@ -8,7 +8,7 @@ using LinqToDB.Mapping;
 namespace Hangfire.MySql.src.Entities
 {
     [Table]
-    internal class DistributedLock
+    public class DistributedLock
     {
         [PrimaryKey]
         public long Id { get; set; }

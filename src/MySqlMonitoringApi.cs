@@ -6,9 +6,11 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Hangfire.Common;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.src.Entities.Extensions;
 using Hangfire.States;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
@@ -32,7 +34,37 @@ namespace Hangfire.MySql.src
 
         public IList<QueueWithTopEnqueuedJobsDto> Queues()
         {
-            return new List<QueueWithTopEnqueuedJobsDto>();
+            var s = _queueProviders
+                        .Select(qProvider => qProvider.GetJobQueueMonitoringApi(ConnectionString))
+                        .SelectMany(x => x.GetQueues())
+                        .ToList();
+
+
+            const int MaxFirstJobs = 5;
+
+            var result = new List<QueueWithTopEnqueuedJobsDto>();
+            foreach (var queue in s)
+            {
+
+                var monitoring = _queueProviders.GetProvider(queue).GetJobQueueMonitoringApi(ConnectionString);
+
+
+                var qw = new QueueWithTopEnqueuedJobsDto()
+                {
+                    Fetched = 0,
+                    FirstJobs = EnqueuedJobs(queue, 0, MaxFirstJobs),
+                    Length = monitoring.GetEnqueuedAndFetchedCount(queue).EnqueuedCount.Value,
+                    Name = queue
+                };
+
+
+                result.Add(qw);
+
+
+            }
+
+            return result;
+            //return new List<QueueWithTopEnqueuedJobsDto>();
         }
 
         public IList<ServerDto> Servers()
@@ -141,7 +173,40 @@ namespace Hangfire.MySql.src
 
         public JobList<EnqueuedJobDto> EnqueuedJobs(string queue, int @from, int perPage)
         {
-            return new JobList<EnqueuedJobDto>(new List<KeyValuePair<string, EnqueuedJobDto>>());
+
+            var jobQueues = UsingTable<Entities.JobQueue, IEnumerable<Entities.JobQueue>>(
+                jQs => jQs
+                    .InQueue(queue)
+                    .OrderBy(jQ => jQ.Id)
+                    .Skip(from)
+                    .Take(perPage)
+                    .ToArray());
+
+
+            var r = new List<KeyValuePair<string, EnqueuedJobDto>>();
+            foreach (var jQ in jobQueues)
+            {
+                var job = UsingTable<Entities.Job, Entities.Job>(jobs => jobs.Single(j => j.Id == jQ.JobId));
+
+                var e = new EnqueuedJobDto()
+                {
+                    EnqueuedAt =
+                        job.IsInState(EnqueuedState.StateName)
+                            ? job.GetNullableDateTimeStateDataValue("EnqueuedAt")
+                            : null,
+                    InEnqueuedState = job.IsInState(EnqueuedState.StateName),
+                    Job = job.ToJobData().Job,
+                    State = job.StateName
+                };
+
+                var pair = new KeyValuePair<string, EnqueuedJobDto>(job.Id.ToString(CultureInfo.InvariantCulture), e);
+                r.Add(pair);
+
+
+            }
+        
+            return new JobList<EnqueuedJobDto>(r);
+            //return new JobList<EnqueuedJobDto>(new List<KeyValuePair<string, EnqueuedJobDto>>());
         }
 
         public JobList<FetchedJobDto> FetchedJobs(string queue, int @from, int perPage)
@@ -221,12 +286,12 @@ namespace Hangfire.MySql.src
 
         public long EnqueuedCount(string queue)
         {
-            return 0;
+            return GetQueueApi(queue).GetEnqueuedAndFetchedCount(queue).EnqueuedCount.Value;
         }
 
         public long FetchedCount(string queue)
         {
-            return 0;
+            return GetQueueApi(queue).GetEnqueuedAndFetchedCount(queue).FetchedCount.Value;
         }
 
         public long FailedCount()
@@ -268,5 +333,14 @@ namespace Hangfire.MySql.src
         {
             return new Dictionary<DateTime, long>();
         }
+
+        private IPersistentJobQueueMonitoringApi GetQueueApi(string queueName)
+        {
+            var provider = _queueProviders.GetProvider(queueName);
+            var monitoringApi = provider.GetJobQueueMonitoringApi(ConnectionString);
+            return monitoringApi;
+        }
+
+
     }
 }

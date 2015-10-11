@@ -11,6 +11,8 @@ using FluentAssertions;
 using Hangfire.Common;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.src.Entities.Extensions;
+using Hangfire.MySql.src.Entities.Filters;
 using Hangfire.Server;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
@@ -161,25 +163,7 @@ namespace Hangfire.MySql.src
             return UsingTable<Entities.Job,JobData>(table =>
             {
                 Entities.Job persistedJob = table.Single(j => j.Id == Convert.ToInt32(jobId));
-                var invocationData = JsonConvert.DeserializeObject<InvocationData>(persistedJob.InvocationData);
-                invocationData.Arguments = persistedJob.Arguments;
-
-                var returnValue = new JobData()
-                {
-                    State = persistedJob.StateName,
-                    CreatedAt = persistedJob.CreatedAt
-                };
-
-                try
-                {
-                    returnValue.Job = invocationData.Deserialize();
-                }
-                catch (JobLoadException ex)
-                {
-                    returnValue.LoadException = ex;
-                }
-
-                return returnValue;
+                return persistedJob.ToJobData();
 
             });
 
@@ -189,9 +173,14 @@ namespace Hangfire.MySql.src
         {
             Debug.WriteLine("#" + jobId + " GetStateData");
 
+            var job = UsingDatabase(db => db.GetTable<Entities.Job>().Row(Convert.ToInt32(jobId)));
+
+            return job.ToStateData();
+
+                /**
+
 
             return UsingDatabase<StateData>(db =>
-
             {
                 var jobStateId = db.GetTable<Entities.Job>()
                     .Single(j => j.Id == Convert.ToInt32(jobId))
@@ -204,6 +193,8 @@ namespace Hangfire.MySql.src
                 return JsonConvert.DeserializeObject<StateData>(stateDataString);
 
             });
+                 * 
+                 * **/
         }
 
         public void AnnounceServer(string serverId, ServerContext context)
