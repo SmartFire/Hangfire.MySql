@@ -50,11 +50,14 @@ namespace Hangfire.MySql.src
         public void ExpireJob(string jobId, TimeSpan expireIn)
         {
             QueueCommand(db =>
+            {
 
                 db.GetTable<Entities.Job>()
                     .Where<Job>(j => j.Id == Convert.ToInt32(jobId))
                     .Set(j => j.ExpireAt, DateTime.UtcNow + expireIn)
-                    .Update());
+                    .Update();
+                Logger.Trace("#" + jobId + " ExpireJob in " + expireIn);
+            });
         }
 
         private readonly DateTime? NullDateTime = null;
@@ -206,9 +209,7 @@ namespace Hangfire.MySql.src
         public void RemoveFromSet(string key, string value)
         {
             AcquireSetLock();
-
             QueueCommand(db => db.GetTable<Set>().Where(sv => (sv.Key == key) && (sv.Value == value)).Delete());
-
         }
 
         public void InsertToList(string key, string value)
@@ -311,9 +312,9 @@ when not matched then insert ([Key], Field, Value) values (Source.[Key], Source.
             {
                 UsingDatabase(db => { foreach (var command in _commandQueue) command(db); });
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.TraceException("Exception during Commit ", exception);
             }
             finally
             {
