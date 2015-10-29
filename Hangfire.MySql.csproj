@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Common\ConnectionBoundDatabaseActor.cs" />
+    <Compile Include="src\Common\LoggingCommandInterceptor.cs" />
     <Compile Include="src\Common\ShortConnectingDatabaseActor.cs" />
     <Compile Include="src\Entities\Counter.cs" />
     <Compile Include="src\Entities\EnqueuedAndFetchedCount.cs" />
