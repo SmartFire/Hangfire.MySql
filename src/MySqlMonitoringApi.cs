@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.Common;
+using Hangfire.Logging;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
 using Hangfire.MySql.src.Entities.Extensions;
@@ -33,6 +34,13 @@ namespace Hangfire.MySql.src
         {
             _queueProviders = queueProviders;
         }
+
+        protected ILog Logger
+        {
+            get { return LogProvider.GetCurrentClassLogger(); }
+        }
+
+
 
         public IList<QueueWithTopEnqueuedJobsDto> Queues()
         {
@@ -71,6 +79,10 @@ namespace Hangfire.MySql.src
 
         public IList<ServerDto> Servers()
         {
+
+            Logger.Trace(DateTime.Now.ToLongTimeString() + " enter Servers()");
+
+
             return UsingTable<Entities.Server, IList<ServerDto>>(servers =>
             {
 
@@ -155,6 +167,9 @@ namespace Hangfire.MySql.src
 
         public StatisticsDto GetStatistics()
         {
+            Logger.Trace(DateTime.Now.ToLongTimeString() + " enter GetStatistics()");
+
+
             return new StatisticsDto()
             {
                 Deleted = GetCounterTotal("stats:deleted"),
