@@ -169,13 +169,18 @@ namespace Hangfire.MySql.src
         {
             Logger.Trace(DateTime.Now.ToLongTimeString() + " enter GetStatistics()");
 
+            var counts = UsingTable<Entities.Job, Dictionary<string, int>>(
+                jobs =>
+                    jobs.Where(job => job.StateName != null)
+                        .GroupBy(job => job.StateName)
+                        .ToDictionary(g => g.Key, g => g.Count()));
 
             return new StatisticsDto()
             {
                 Deleted = GetCounterTotal("stats:deleted"),
-                Enqueued = GetNJobsInState(EnqueuedState.StateName),
-                Failed = GetNJobsInState(FailedState.StateName),
-                Processing = GetNJobsInState(ProcessingState.StateName),
+                Enqueued = counts.ContainsKey(EnqueuedState.StateName) ? counts[EnqueuedState.StateName] : 0,
+                Failed = counts.ContainsKey(FailedState.StateName) ? counts[FailedState.StateName] : 0,
+                Processing = counts.ContainsKey(ProcessingState.StateName) ? counts[ProcessingState.StateName] : 0,
                 Queues = 0,
                 /* _queueProviders
                     .SelectMany(x => x.GetJobQueueMonitoringApi(connection).GetQueues())
@@ -183,7 +188,7 @@ namespace Hangfire.MySql.src
                  * */
                 Recurring = UsingTable<Entities.Set, long>(sets => sets.Count(s => s.Key == "recurring-jobs")),
                 Succeeded = GetCounterTotal("stats:succeeded"),
-                Scheduled = GetNJobsInState(ScheduledState.StateName),
+                Scheduled = counts.ContainsKey(ScheduledState.StateName) ? counts[ScheduledState.StateName] : 0,
                 Servers = UsingTable<Entities.Server,long>(servers=>servers.Count())
             };
         }
