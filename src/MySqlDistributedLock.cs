@@ -93,6 +93,8 @@ namespace Hangfire.MySql.src
                 }
             }
 
+            _connection.Dispose();
+
         }
     }
 }
