@@ -184,7 +184,7 @@ namespace Hangfire.MySql.src
                 Recurring = UsingTable<Entities.Set, long>(sets => sets.Count(s => s.Key == "recurring-jobs")),
                 Succeeded = GetCounterTotal("stats:succeeded"),
                 Scheduled = GetNJobsInState(ScheduledState.StateName),
-                Servers = Servers().Count
+                Servers = UsingTable<Entities.Server,long>(servers=>servers.Count())
             };
         }
 
