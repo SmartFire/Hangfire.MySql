@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Hangfire.Logging;
 using Hangfire.MySql.Common;
 using MySql.Data.MySqlClient;
 
@@ -21,9 +22,19 @@ namespace Hangfire.MySql.src
             _options = options;
         }
 
+        protected ILog Logger
+        {
+            get { return LogProvider.GetCurrentClassLogger(); }
+        }
+
+
+
 
         public IPersistentJobQueue GetJobQueue(string connectionString)
         {
+            Logger.Trace(DateTime.Now.ToLongTimeString() + " GetJobQueue ");
+
+
             return new MySqlJobQueue(connectionString, _options);
         }
 
@@ -31,6 +42,8 @@ namespace Hangfire.MySql.src
 
         public IPersistentJobQueueMonitoringApi GetJobQueueMonitoringApi(string connectionString)
         {
+            Logger.Trace(DateTime.Now.ToLongTimeString() + " GetJobQueueMonitoringApi ");
+
             return new MySqlJobQueueMonitoringApi(connectionString, _options);
         }
 

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.Annotations;
 using Hangfire.Common;
+using Hangfire.Logging;
 using Hangfire.MySql.Common;
 using Hangfire.MySql.src.Entities;
 using Hangfire.Storage;
@@ -31,12 +32,21 @@ namespace Hangfire.MySql.src
             _options = options;
         }
 
+        protected ILog Logger
+        {
+            get { return LogProvider.GetCurrentClassLogger(); }
+        }
+
+
 
         // why did Frank use his own attributes ??
 
         [NotNull]
         public IFetchedJob Dequeue(string[] queues, CancellationToken cancellationToken)
         {
+
+            Logger.Trace( DateTime.Now.ToLongTimeString() + " enter Dequeue()");
+
 
             return UsingDatabase(db =>
             {
@@ -57,13 +67,21 @@ namespace Hangfire.MySql.src
 
                     if (nUpdated != 0)
                     {
+
                         nUpdated.Should().Be(1);
                         var jobQueue = db.GetTable<JobQueue>().Single(jq => jq.FetchToken == token);
+
+                        Logger.Trace(DateTime.Now.ToLongTimeString() + " returning fetched job " + jobQueue.JobId);
+
                         return new MySqlFetchedJob(ConnectionString,
                             jobQueue.Id,
                             jobQueue.JobId.ToString(CultureInfo.InvariantCulture),
                             jobQueue.Queue);
                     }
+
+
+                    Logger.Trace(DateTime.Now.ToLongTimeString() + " waiting");
+
 
                     cancellationToken.WaitHandle.WaitOne(TimeSpan.FromSeconds(3));
                     cancellationToken.ThrowIfCancellationRequested();
