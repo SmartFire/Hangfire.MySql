@@ -37,15 +37,21 @@ namespace Hangfire.MySql.src
         {
         }
 
+
+
         public MySqlStorageConnection(
             string connectionString,
             PersistentJobQueueProviderCollection queueProviders,
             bool ownsConnection)
             : base(connectionString)
         {
-
             queueProviders.Should().NotBeNull();
             _queueProviders = queueProviders;
+        }
+
+        protected ILog Logger
+        {
+            get { return LogProvider.GetCurrentClassLogger(); }
         }
 
 
@@ -64,11 +70,7 @@ namespace Hangfire.MySql.src
             TimeSpan expireIn)
         {
 
-            ILog log = LogProvider.GetLogger(this.GetType());
-
           
-            Debug.Write("CreateExpiredJob ");
-
             // TODO make this a transaction
 
             var invocationData = InvocationData.Serialize(job);
@@ -98,9 +100,6 @@ namespace Hangfire.MySql.src
                     });
 
                 }
-
-
-                log.Log(LogLevel.Trace, ()=> string.Format("CreateExpiredJob inserted job {0}", jobId));
 
 
                 return jobId.ToString(CultureInfo.InvariantCulture);
