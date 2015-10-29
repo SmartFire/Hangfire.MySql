@@ -14,12 +14,17 @@ namespace Hangfire.MySql.src
     public class MySqlJobQueueProvider : ShortConnectingDatabaseActor, IPersistentJobQueueProvider
     {
         private readonly MySqlStorageOptions _options;
+        private MySqlJobQueue _jobQueue;
+        private MySqlJobQueueMonitoringApi _monitoringApi;
 
         public MySqlJobQueueProvider(string connectionString, MySqlStorageOptions options)
             : base(connectionString)
         {
             options.Should().NotBeNull();
             _options = options;
+
+            _jobQueue = new MySqlJobQueue(connectionString, _options);
+            _monitoringApi = new MySqlJobQueueMonitoringApi(connectionString, _options);
         }
 
         protected ILog Logger
@@ -33,9 +38,7 @@ namespace Hangfire.MySql.src
         public IPersistentJobQueue GetJobQueue(string connectionString)
         {
             Logger.Trace(DateTime.Now.ToLongTimeString() + " GetJobQueue ");
-
-
-            return new MySqlJobQueue(connectionString, _options);
+            return _jobQueue;
         }
 
 
@@ -43,8 +46,7 @@ namespace Hangfire.MySql.src
         public IPersistentJobQueueMonitoringApi GetJobQueueMonitoringApi(string connectionString)
         {
             Logger.Trace(DateTime.Now.ToLongTimeString() + " GetJobQueueMonitoringApi ");
-
-            return new MySqlJobQueueMonitoringApi(connectionString, _options);
+            return _monitoringApi;
         }
 
       
