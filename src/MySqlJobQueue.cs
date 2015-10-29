@@ -83,7 +83,7 @@ namespace Hangfire.MySql.src
                     Logger.Trace(DateTime.Now.ToLongTimeString() + " waiting");
 
 
-                    cancellationToken.WaitHandle.WaitOne(TimeSpan.FromSeconds(3));
+                    cancellationToken.WaitHandle.WaitOne(_options.QueuePollInterval);
                     cancellationToken.ThrowIfCancellationRequested();
 
                 } while (true);
