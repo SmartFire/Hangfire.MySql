@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.Annotations;
-using Hangfire.Client;
-using Hangfire.MySql.Common;
 using Hangfire.MySql.src;
 using Hangfire.Server;
 using Hangfire.Storage;
-using LinqToDB;
-using MySql.Data.MySqlClient;
 
 namespace Hangfire.MySql
 {
@@ -38,17 +30,8 @@ namespace Hangfire.MySql
             _connectionString = GetConnectionStringFrom(nameOrConnectionString);
             _options = options;
 
-            InitialseDatabaseConnection();
             InitializeQueueProviders();
 
-        }
-
-        protected MySqlConnection Connection { get; private set; }
-
-        private void InitialseDatabaseConnection()
-        {
-            Connection = new MySqlConnection(_connectionString);
-            Connection.Open();
         }
 
         public PersistentJobQueueProviderCollection QueueProviders { get; private set; }
@@ -98,8 +81,6 @@ namespace Hangfire.MySql
 
         public void Dispose()
         {
-            Connection.Dispose();
-            
         }
     }
 
