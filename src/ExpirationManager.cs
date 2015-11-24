@@ -66,9 +66,10 @@ namespace Hangfire.MySql.src
 
                             removedCount = connection.Execute(
                                 String.Format(@"
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 START TRANSACTION;
-SET TRANSACTION ISOLATION LEVEL READ COMITTED;
-delete from [{0}].[{1}] limit @count where ExpireAt < @now;", connection.DataProvider.GetSchemaProvider().GetSchema(connection).Database, table),
+delete from [{0}].[{1}] where ExpireAt < @now limit @count;
+COMMIT;", connection.DataProvider.GetSchemaProvider().GetSchema(connection).Database, table),
                                 new { now = DateTime.UtcNow, count = NumberOfRecordsInSinglePass });
 
                         }
