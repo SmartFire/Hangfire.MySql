@@ -14,7 +14,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     internal class Job : IHasId
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
         [Column]
         public string InvocationData { get; set; }

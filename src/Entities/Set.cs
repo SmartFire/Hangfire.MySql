@@ -10,7 +10,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     internal class Set
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
 
         [Column]

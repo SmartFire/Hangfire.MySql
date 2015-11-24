@@ -5,7 +5,12 @@ using FluentAssertions;
 using Hangfire.Annotations;
 using Hangfire.MySql.src;
 using Hangfire.Server;
+using Hangfire.MySql.Common;
 using Hangfire.Storage;
+using LinqToDB.Data;
+using LinqToDB.DataProvider.MySql;
+using LinqToDB.SchemaProvider;
+using MySql.Data.MySqlClient;
 
 namespace Hangfire.MySql
 {
@@ -29,8 +34,13 @@ namespace Hangfire.MySql
         {
             _connectionString = GetConnectionStringFrom(nameOrConnectionString);
             _options = options;
+            
+            Setup setup = new Setup(_connectionString);
+            setup.EnsureDatabase();
 
             InitializeQueueProviders();
+
+
 
         }
 
@@ -53,6 +63,18 @@ namespace Hangfire.MySql
            // yield return new CountersAggregator(this, _options.CountersAggregateInterval);
         }
 
+        private TResult UseConnection<TResult>(Func<DataConnection, TResult> func)
+        {
+            using (var dc = new DataConnection(new MySqlDataProvider(), _connectionString))
+            {
+                return func(dc);
+            }
+        }
+
+        public void UsingDatabase(Action<DataConnection> action)
+        {
+            UseConnection(dc => { action(dc); return true; });
+        }
 
         private void InitializeQueueProviders()
         {

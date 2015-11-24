@@ -22,7 +22,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     public class Counter
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
 
         [Column]

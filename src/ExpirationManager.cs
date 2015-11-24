@@ -7,40 +7,90 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.Logging;
+using Hangfire.MySql.Common;
 using Hangfire.Server;
+using LinqToDB.Data;
 
 namespace Hangfire.MySql.src
 {
     internal class ExpirationManager : IServerComponent
     {
-        private readonly MySqlStorage _storage;
-        private readonly TimeSpan _checkInterval;
+        private static readonly ILog Logger = LogProvider.GetCurrentClassLogger();
 
-        private static readonly TimeSpan DefaultCheckInterval = TimeSpan.FromHours(1);
-
+        private const string DistributedLockKey = "locks:expirationmanager";
+        private static readonly TimeSpan DefaultLockTimeout = TimeSpan.FromMinutes(5);
         private static readonly TimeSpan DelayBetweenPasses = TimeSpan.FromSeconds(1);
         private const int NumberOfRecordsInSinglePass = 1000;
 
+        private static readonly string[] ProcessedTables =
+        {
+            "AggregatedCounter",
+            "Job",
+            "List",
+            "Set",
+            "Hash",
+        };
+
+        private readonly MySqlStorage _storage;
+        private readonly TimeSpan _checkInterval;
 
         public ExpirationManager(MySqlStorage storage)
-            : this(storage, DefaultCheckInterval)
+            : this(storage, TimeSpan.FromHours(1))
         {
         }
 
         public ExpirationManager(MySqlStorage storage, TimeSpan checkInterval)
         {
-
-            storage.Should().NotBeNull();
-
+            if (storage == null) throw new ArgumentNullException("storage");
 
             _storage = storage;
             _checkInterval = checkInterval;
         }
 
-
         public void Execute(CancellationToken cancellationToken)
         {
-            // TODO
+            foreach (var table in ProcessedTables)
+            {
+                Logger.DebugFormat("Removing outdated records from table '{0}'...", table);
+
+                int removedCount = 0;
+
+                do
+                {
+                    _storage.UsingDatabase(connection =>
+                    {
+                        using (
+                            var lck = _storage.GetConnection()
+                                .AcquireDistributedLock(DistributedLockKey, DefaultLockTimeout))
+                        {
+
+                            removedCount = connection.Execute(
+                                String.Format(@"
+START TRANSACTION;
+SET TRANSACTION ISOLATION LEVEL READ COMITTED;
+delete from [{0}].[{1}] limit @count where ExpireAt < @now;", connection.DataProvider.GetSchemaProvider().GetSchema(connection).Database, table),
+                                new { now = DateTime.UtcNow, count = NumberOfRecordsInSinglePass });
+
+                        }
+                    });
+
+                    if (removedCount > 0)
+                    {
+                        Logger.Trace(String.Format("Removed {0} outdated record(s) from '{1}' table.", removedCount,
+                            table));
+
+                        cancellationToken.WaitHandle.WaitOne(DelayBetweenPasses);
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                } while (removedCount != 0);
+            }
+
+            cancellationToken.WaitHandle.WaitOne(_checkInterval);
+        }
+
+        public override string ToString()
+        {
+            return GetType().ToString();
         }
     }
 

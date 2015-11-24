@@ -10,7 +10,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     internal class Hash
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
         [Column]
         public string Key { get; set; }

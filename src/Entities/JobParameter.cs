@@ -10,7 +10,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     internal class JobParameter
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
         [Column]
         public int JobId { get; set; }
