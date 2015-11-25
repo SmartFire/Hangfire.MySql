@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -238,12 +239,39 @@ namespace Hangfire.MySql.src
 
         public JobList<ProcessingJobDto> ProcessingJobs(int @from, int count)
         {
-            return new JobList<ProcessingJobDto>(new List<KeyValuePair<string, ProcessingJobDto>>());
-        }
+			return UsingDatabase(db => {
+				return new JobList<ProcessingJobDto>(db.GetTable<Entities.Job>()
+					.Where(x=>x.StateName == "Processing")
+					.OrderByDescending(x=>x.Id)
+					.Skip(from)
+					.Take(count)
+					.Select(x=> new KeyValuePair<string,ProcessingJobDto>(x.Id.ToString(), new ProcessingJobDto() 
+					{
+						Job = x.ToCommonJob(),
+						ServerId =  x.ToStateData().Data.ContainsKey("ServerId") ? x.ToStateData().Data["ServerId"] : x.ToStateData().Data["ServerName"],
+						StartedAt = x.GetNullableDateTimeStateDataValue("StartedAt")
+					}))
+					.ToList());
+			});
+		}
 
         public JobList<ScheduledJobDto> ScheduledJobs(int @from, int count)
         {
-            return new JobList<ScheduledJobDto>(new List<KeyValuePair<string, ScheduledJobDto>>());
+			return UsingDatabase(db => {
+				
+				return new JobList<ScheduledJobDto>(db.GetTable<Entities.Job>()
+					.Where(j=>j.StateName == "Scheduled")
+					.OrderByDescending(j=>j.Id)
+					.Skip(from)
+					.Take(count)
+					.Select(x=> new KeyValuePair<string,ScheduledJobDto>(x.Id.ToString(), new ScheduledJobDto()
+					{
+						Job = x.ToCommonJob(), 
+						EnqueueAt = x.CreatedAt,
+						ScheduledAt = x.GetNullableDateTimeStateDataValue("ScheduledAt")
+					}))
+					.ToList());
+			});
         }
 
         public JobList<SucceededJobDto> SucceededJobs(int @from, int count)
@@ -290,15 +318,43 @@ namespace Hangfire.MySql.src
 
         public JobList<FailedJobDto> FailedJobs(int @from, int count)
         {
-            return new JobList<FailedJobDto>(new List<KeyValuePair<string, FailedJobDto>>());
-
-
+			return UsingDatabase(db =>
+			{
+				return new JobList<FailedJobDto>(db.GetTable<Entities.Job>()
+					.Where(x => x.StateName == "Failed")
+					.OrderByDescending(x => x.Id)
+					.Skip(from)
+					.Take(count)
+					.Select(x => new KeyValuePair<string, FailedJobDto>(x.Id.ToString(), new FailedJobDto()
+					{
+						Job = x.ToCommonJob(),
+						Reason = x.StateReason,
+						ExceptionDetails = x.ToStateData().Data["ExceptionDetails"],
+						ExceptionMessage = x.ToStateData().Data["ExceptionMessage"],
+						ExceptionType = x.ToStateData().Data["ExceptionType"],
+						FailedAt = JobHelper.DeserializeNullableDateTime(x.ToStateData().Data["FailedAt"])
+					}))
+					.ToList());
+			});
+			
         }
 
         public JobList<DeletedJobDto> DeletedJobs(int @from, int count)
         {
-            return new JobList<DeletedJobDto>(new List<KeyValuePair<string, DeletedJobDto>>());
-
+			return UsingDatabase(db =>
+			{
+				return new JobList<DeletedJobDto>(db.GetTable<Entities.Job>()
+					.Where(x => x.StateName == "Deleted")
+					.OrderByDescending(x => x.Id)
+					.Skip(from)
+					.Take(count)
+					.Select(x => new KeyValuePair<string, DeletedJobDto>(x.Id.ToString(), new DeletedJobDto()
+					{
+						Job = x.ToCommonJob(),
+						DeletedAt = JobHelper.DeserializeNullableDateTime(x.ToStateData().Data["DeletedAt"])
+					}))
+					.ToList());
+			});
         }
 
         public long ScheduledCount()
