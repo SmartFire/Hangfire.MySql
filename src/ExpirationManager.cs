@@ -59,19 +59,26 @@ namespace Hangfire.MySql.src
                 {
                     _storage.UsingDatabase(connection =>
                     {
-                        using (
-                            var lck = _storage.GetConnection()
-                                .AcquireDistributedLock(DistributedLockKey, DefaultLockTimeout))
+                        if (
+                            connection.DataProvider.GetSchemaProvider()
+                                .GetSchema(connection)
+                                .Tables.Any(t => t.TableName.ToLowerInvariant() == table.ToLowerInvariant()))
                         {
 
-                            removedCount = connection.Execute(
-                                String.Format(@"
+                            using (
+                                var lck = _storage.GetConnection()
+                                    .AcquireDistributedLock(DistributedLockKey, DefaultLockTimeout))
+                            {
+
+                                removedCount = connection.Execute(
+                                    String.Format(@"
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
 START TRANSACTION;
-delete from [{0}].[{1}] where ExpireAt < @now limit @count;
+delete from {0}.{1} where ExpireAt < @now limit @count;
 COMMIT;", connection.DataProvider.GetSchemaProvider().GetSchema(connection).Database, table),
-                                new { now = DateTime.UtcNow, count = NumberOfRecordsInSinglePass });
+                                    new {now = DateTime.UtcNow, count = NumberOfRecordsInSinglePass});
 
+                            }
                         }
                     });
 
