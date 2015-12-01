@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Hangfire.MySql.src.Entities.Interfaces;
+using LinqToDB;
 using LinqToDB.Mapping;
 
 namespace Hangfire.MySql.src.Entities
@@ -16,9 +17,9 @@ namespace Hangfire.MySql.src.Entities
     {
         [PrimaryKey, Identity]
         public int Id { get; set; }
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string InvocationData { get; set; }
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string Arguments { get; set; }
         [Column]
         public DateTime CreatedAt { get; set; }
@@ -30,9 +31,9 @@ namespace Hangfire.MySql.src.Entities
         public int StateId { get; set; }
         [Column]
         public string StateName { get; set; }
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string StateReason { get; set; }
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string StateData { get; set; }
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LinqToDB;
 using LinqToDB.Mapping;
 
 namespace Hangfire.MySql.src.Entities
@@ -16,7 +17,7 @@ namespace Hangfire.MySql.src.Entities
         public string Key { get; set; }
         [Column]
         public string Field { get; set; }
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string Value { get; set; }
         [Column]
         public DateTime? ExpireAt { get; set; }
