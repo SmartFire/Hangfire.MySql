@@ -27,7 +27,8 @@ namespace Hangfire.MySql.src
     {
         private readonly MySqlStorageOptions _options;
 
-        public MySqlJobQueue(string connectionString, MySqlStorageOptions options) : base(connectionString)
+        public MySqlJobQueue(string connectionString, MySqlStorageOptions options)
+            : base(connectionString)
         {
             _options = options;
         }
@@ -45,19 +46,17 @@ namespace Hangfire.MySql.src
         public IFetchedJob Dequeue(string[] queues, CancellationToken cancellationToken)
         {
 
-            Logger.Trace( DateTime.Now.ToLongTimeString() + " enter Dequeue()");
+            Logger.Trace(DateTime.Now.ToLongTimeString() + " enter Dequeue()");
 
-
-            return UsingDatabase(db =>
+            MySqlFetchedJob job = null;
+            do
             {
-
-                string token = Guid.NewGuid().ToString();
-
-                do
+                cancellationToken.ThrowIfCancellationRequested();
+                UsingDatabase(db =>
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
 
-                    int nUpdated = db.GetTable<JobQueue>()
+                    string token = Guid.NewGuid().ToString();
+                    int nUpdated = db.GetTable<JobQueue>(true)
                         .Where(jq => jq.FetchedAt == NullDateTime)
                         .Where(jq => queues.Contains(jq.Queue))
                         .Take(1)
@@ -69,11 +68,11 @@ namespace Hangfire.MySql.src
                     {
 
                         nUpdated.Should().Be(1);
-                        var jobQueue = db.GetTable<JobQueue>().Single(jq => jq.FetchToken == token);
+                        var jobQueue = db.GetTable<JobQueue>(true).Single(jq => jq.FetchToken == token);
 
                         Logger.Trace(DateTime.Now.ToLongTimeString() + " returning fetched job " + jobQueue.JobId);
 
-                        return new MySqlFetchedJob(ConnectionString,
+                        job = new MySqlFetchedJob(ConnectionString,
                             jobQueue.Id,
                             jobQueue.JobId.ToString(CultureInfo.InvariantCulture),
                             jobQueue.Queue);
@@ -86,9 +85,11 @@ namespace Hangfire.MySql.src
                     cancellationToken.WaitHandle.WaitOne(_options.QueuePollInterval);
                     cancellationToken.ThrowIfCancellationRequested();
 
-                } while (true);
-            });
 
+                });
+            } while (job == null);
+
+            return job;
 
         }
 
