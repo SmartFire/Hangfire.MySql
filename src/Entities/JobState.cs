@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LinqToDB;
 using LinqToDB.Mapping;
 
 namespace Hangfire.MySql.src.Entities
@@ -10,7 +11,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     internal class JobState
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public int Id { get; set; }
         
         [Column]
@@ -25,7 +26,7 @@ namespace Hangfire.MySql.src.Entities
         [Column]
         public DateTime CreatedAt { get; set; }
 
-        [Column]
+        [Column(DataType = DataType.Text)]
         public string Data { get; set; }
     }
 

@@ -10,7 +10,7 @@ namespace Hangfire.MySql.src.Entities
     [Table]
     public class DistributedLock
     {
-        [PrimaryKey]
+        [PrimaryKey, Identity]
         public long Id { get; set; }
 
         [Column]
