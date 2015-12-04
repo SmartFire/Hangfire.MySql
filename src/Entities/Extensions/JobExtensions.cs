@@ -17,7 +17,14 @@ namespace Hangfire.MySql.src.Entities.Extensions
         {
             var invocationData = JsonConvert.DeserializeObject<InvocationData>(job.InvocationData);
             invocationData.Arguments = job.Arguments;
-            return invocationData.Deserialize();
+			try
+			{
+				return invocationData.Deserialize();
+			}
+			catch (JobLoadException jl)
+			{
+				return null;
+			}
         }
 
 
