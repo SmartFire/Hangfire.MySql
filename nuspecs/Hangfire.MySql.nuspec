@@ -3,18 +3,18 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Hangfire.MySql</id>
     <title>Hangfire MySql Storage</title>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <authors>Christopher Love, Daniel Park</authors>
     <owners>Christopher Love</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>MySql Connector for Hangfire</summary>
+    <summary>MySql Storage for Hangfire</summary>
     <description>
-    MySql connector for Hangfire
+      MySql storage implementation for Hangfire (background job system for ASP.NET applications).
     </description>
     <language>en-US</language>
     <projectUrl>http://http://hangfire.io/</projectUrl>
     <licenseUrl>https://raw.githubusercontent.com/chrislove/Hangfire.MySql/master/LICENSE.txt</licenseUrl>
-    <tags>hangfire</tags>
+    <tags>Hangfire MySql</tags>
     <dependencies>
       <dependency id="Owin" version="1.0" />
       <dependency id="Newtonsoft.Json" version="5.0.0" />
