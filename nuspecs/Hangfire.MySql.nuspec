@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Hangfire.MySql</id>
     <title>Hangfire MySql Storage</title>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <authors>Christopher Love, Daniel Park</authors>
     <owners>Christopher Love</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -19,7 +19,7 @@
       <dependency id="Owin" version="1.0" />
       <dependency id="Newtonsoft.Json" version="5.0.0" />
       <dependency id="Hangfire.Core" version="1.5.3" />
-      <dependency id="FluentAssertions" version="4.0.0" />
+      <dependency id="FluentAssertions" version="4.1.0" />
       <dependency id="linq2db.MySql" version="1.0.7.3"  />
     </dependencies>
   </metadata>
