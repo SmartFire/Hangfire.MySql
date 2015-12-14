@@ -58,7 +58,7 @@ namespace Hangfire.MySql.src
         {
             try
             {
-                using (var db = new DataConnection(new MySqlDataProvider(), _connection))
+                using (var db = new DataConnection(DatabaseActor.DataProvider, _connection))
                 {
                     return Convert.ToInt32(db.InsertWithIdentity(new Entities.DistributedLock()
                     {
@@ -83,7 +83,7 @@ namespace Hangfire.MySql.src
             if (!_lockDeleted)
             {
                 _lockDeleted = true;
-                using (var db = new DataConnection(new MySqlDataProvider(), _connection))
+                using (var db = new DataConnection(DatabaseActor.DataProvider, _connection))
                 {
                     int nDeleted = db.GetTable<DistributedLock>().Where(dl => dl.Id == _lockId).Delete();
                     if (nDeleted != 1)

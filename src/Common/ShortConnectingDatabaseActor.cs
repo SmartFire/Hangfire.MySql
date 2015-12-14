@@ -20,7 +20,7 @@ namespace Hangfire.MySql.Common
 
         protected override TResult Invoke<TResult>(Func<DataConnection, TResult> func)
         {
-                using (var dc = new DataConnection(new MySqlDataProvider(),_connectionString))
+                using (var dc = new DataConnection(DataProvider,_connectionString))
                 {
                     return func(dc);
                 }

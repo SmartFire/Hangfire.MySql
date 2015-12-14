@@ -10,6 +10,7 @@ using Hangfire.MySql.src.Entities.Filters;
 using Hangfire.MySql.src.Entities.Interfaces;
 using LinqToDB;
 using LinqToDB.Data;
+using LinqToDB.DataProvider;
 using LinqToDB.DataProvider.MySql;
 using MySql.Data.MySqlClient;
 
@@ -17,7 +18,13 @@ namespace Hangfire.MySql.src
 {
     public abstract class DatabaseActor
     {
-       
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static IDataProvider DataProvider = new MySqlDataProvider();
+
+
         protected readonly DateTime? NullDateTime = null;
 
         
@@ -56,5 +63,6 @@ namespace Hangfire.MySql.src
 
         protected abstract TResult Invoke<TResult>(Func<DataConnection, TResult> func);
 
+        
     }
 }

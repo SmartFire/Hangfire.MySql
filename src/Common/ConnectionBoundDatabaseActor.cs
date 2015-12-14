@@ -25,7 +25,7 @@ namespace Hangfire.MySql.Common
         {
             Debug.WriteLine(func.ToString());
 
-            using (var dataConnection = new DataConnection(new MySqlDataProvider(), Connection))
+            using (var dataConnection = new DataConnection(DataProvider, Connection))
             {
                 return func(dataConnection);
             }

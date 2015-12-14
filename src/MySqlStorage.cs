@@ -65,7 +65,7 @@ namespace Hangfire.MySql
 
         private TResult UseConnection<TResult>(Func<DataConnection, TResult> func)
         {
-            using (var dc = new DataConnection(new MySqlDataProvider(), _connectionString))
+            using (var dc = new DataConnection(DatabaseActor.DataProvider, _connectionString))
             {
                 return func(dc);
             }
