@@ -11,6 +11,7 @@ using LinqToDB.Data;
 using LinqToDB.DataProvider.MySql;
 using LinqToDB.SchemaProvider;
 using MySql.Data.MySqlClient;
+using System.Threading;
 
 namespace Hangfire.MySql
 {
@@ -52,9 +53,30 @@ namespace Hangfire.MySql
             return new MySqlMonitoringApi(_connectionString, QueueProviders);
         }
 
-        public override IStorageConnection GetConnection()
-        {
-            return new MySqlStorageConnection(_connectionString, QueueProviders);
+
+		static DateTime LastCompletionTime = DateTime.MinValue; 
+        static TimeSpan minimumInterval = TimeSpan.FromMilliseconds(250);
+		static DateTime startTime = DateTime.Now;
+		static object lockHandle = new object();
+		
+		public override IStorageConnection GetConnection()
+		{
+			if(startTime >= DateTime.Now.AddMinutes(-1)) 
+			{
+				lock(lockHandle) 
+				{
+					var goodTimeToStart = LastCompletionTime + minimumInterval;
+					if(goodTimeToStart >= DateTime.Now)
+					{
+						var timespantowait = (goodTimeToStart - DateTime.Now + new TimeSpan(new Random(Thread.CurrentThread.ManagedThreadId).Next(-100,100)));
+						Console.WriteLine(timespantowait.ToString());
+						Thread.Sleep(timespantowait);
+					}
+					LastCompletionTime = DateTime.Now;
+				}
+			}
+			else { Console.WriteLine("Unlocked"); }
+			return new MySqlStorageConnection(_connectionString, QueueProviders);
         }
 
         public override IEnumerable<IServerComponent> GetComponents()
