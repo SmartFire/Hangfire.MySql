@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire.Logging;
-using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.Entities;
 using LinqToDB;
 using LinqToDB.Data;
 using LinqToDB.DataProvider.MySql;

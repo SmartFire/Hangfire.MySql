@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using LinqToDB;
 using LinqToDB.Mapping;
 
-namespace Hangfire.MySql.src.Entities
+namespace Hangfire.MySql.Entities
 {
     [Table]
     internal class JobState

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Hangfire.MySql.Common;
-using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.Entities;
 using MySql.Data.MySqlClient;
 
 namespace Hangfire.MySql.src

@@ -36,7 +36,8 @@ namespace Hangfire.MySql
             _options = options;
             
             Setup setup = new Setup(_connectionString);
-            setup.EnsureDatabase();
+            if(options.EnsureDatabase)
+                setup.EnsureDatabase();
 
             InitializeQueueProviders();
 

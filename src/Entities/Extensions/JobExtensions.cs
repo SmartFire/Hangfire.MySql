@@ -8,7 +8,7 @@ using Hangfire.Storage;
 using LinqToDB.SqlQuery;
 using Newtonsoft.Json;
 
-namespace Hangfire.MySql.src.Entities.Extensions
+namespace Hangfire.MySql.Entities.Extensions
 {
     internal static class JobExtensions
     {
