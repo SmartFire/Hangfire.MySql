@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Hangfire.MySql.src.Entities.Interfaces;
+using Hangfire.MySql.Entities.Interfaces;
 using LinqToDB.SqlQuery;
 
-namespace Hangfire.MySql.src.Entities.Filters
+namespace Hangfire.MySql.Entities.Filters
 {
     internal static class IdFilters
     {

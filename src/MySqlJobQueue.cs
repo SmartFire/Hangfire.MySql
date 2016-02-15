@@ -13,7 +13,7 @@ using Hangfire.Annotations;
 using Hangfire.Common;
 using Hangfire.Logging;
 using Hangfire.MySql.Common;
-using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.Entities;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
 using LinqToDB;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Hangfire.MySql.src.Entities;
+using Hangfire.MySql.Entities;
 
 namespace Hangfire.MySql.src
 {

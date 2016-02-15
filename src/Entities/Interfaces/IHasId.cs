@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hangfire.MySql.src.Entities.Interfaces
+namespace Hangfire.MySql.Entities.Interfaces
 {
     public interface IHasId
     {

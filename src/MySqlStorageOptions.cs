@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Hangfire.MySql.src
+namespace Hangfire.MySql
 {
     public class MySqlStorageOptions
     {
@@ -15,8 +11,13 @@ namespace Hangfire.MySql.src
         public MySqlStorageOptions()
         {
             QueuePollInterval = TimeSpan.FromSeconds(15);
-
+            EnsureDatabase = true;
         }
+
+        /// <summary>
+        /// Should the database schema be checked for missing hangfire tables and updated if any are missing? Default==true.
+        /// </summary>
+        public bool EnsureDatabase { get; set; }
 
         public TimeSpan QueuePollInterval
         {

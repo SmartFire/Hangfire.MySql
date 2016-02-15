@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LinqToDB.Mapping;
 
-namespace Hangfire.MySql.src.Entities
+namespace Hangfire.MySql.Entities
 {
     [Table]
     public class List

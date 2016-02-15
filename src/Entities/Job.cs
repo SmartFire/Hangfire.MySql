@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Hangfire.MySql.src.Entities.Interfaces;
+using Hangfire.MySql.Entities.Interfaces;
 using LinqToDB;
 using LinqToDB.Mapping;
 
-namespace Hangfire.MySql.src.Entities
+namespace Hangfire.MySql.Entities
 {
 
     // TODO: should this be called MySqlJob - check with SqlStorage
